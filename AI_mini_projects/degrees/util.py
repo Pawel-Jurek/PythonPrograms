@@ -36,3 +36,9 @@ class QueueFrontier(StackFrontier):
             node = self.frontier[0]
             self.frontier = self.frontier[1:]
             return node
+
+    def __repr__(self):
+        nodes = ""
+        for node in self.frontier:
+            nodes += node.state + ", "
+        return nodes + "\n"

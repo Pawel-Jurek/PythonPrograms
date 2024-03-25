@@ -62,10 +62,10 @@ def main():
     load_data(directory)
     print("Data loaded.")
 
-    source = person_id_for_name(input("Name: "))
+    source = person_id_for_name(input("1st name: "))
     if source is None:
         sys.exit("Person not found.")
-    target = person_id_for_name(input("Name: "))
+    target = person_id_for_name(input("2nd name: "))
     if target is None:
         sys.exit("Person not found.")
 
@@ -85,15 +85,29 @@ def main():
 
 
 def shortest_path(source, target):
-    """
-    Returns the shortest list of (movie_id, person_id) pairs
-    that connect the source to the target.
+    start = Node(source, None, None)
+    queue = QueueFrontier()
+    queue.add(start)  
+    explored = set()
+    while True:
+        if queue.empty():
+            return None      
+        node = queue.remove()
+        state = node.state
+    
+        if(node.state == target):
+            actions = []
+            while node.parent is not None:
+                actions.append(node.action)
+                node = node.parent
+            return actions[::-1]
+        explored.add(state)
 
-    If no possible path, returns None.
-    """
+        for action in neighbors_for_person(node.state):
+            if action[1] not in explored and not queue.contains_state(action[1]):
+                child = Node(action[1], node, action)
+                queue.add(child)
 
-    # TODO
-    raise NotImplementedError
 
 
 def person_id_for_name(name):

@@ -28,10 +28,12 @@ def player(board):
 
 
 def actions(board):
-    """
-    Returns set of all possible actions (i, j) available on the board.
-    """
-    raise NotImplementedError
+    possible_actions = set()
+    for y, row in enumerate(board):
+        for x, state in enumerate(row):
+            if (state == EMPTY):
+                possible_actions.add(x, y)
+    return possible_actions
 
 
 def result(board, action):

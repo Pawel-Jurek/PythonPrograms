@@ -34,7 +34,7 @@ def actions(board):
     for y, row in enumerate(board):
         for x, state in enumerate(row):
             if (state == EMPTY):
-                possible_actions.add(x, y)
+                possible_actions.add((x, y))
     return possible_actions
 
 

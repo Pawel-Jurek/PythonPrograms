@@ -4,6 +4,7 @@ Tic Tac Toe Player
 
 import copy
 import math
+import pandas as pd
 
 X = "X"
 O = "O"
@@ -44,12 +45,26 @@ def result(board, action):
     board_copy[action[1]][action[0]] = player(board)
     return board_copy
 
-
+def get_winner_from_half_matrix(board):
+    diagonal = []
+    for i, row in enumerate(board):
+        values = set(row)
+        if len(values) == 1 and EMPTY not in values:
+            return values.pop()
+        diagonal.append(board[i][i])
+    diagonal_set = set(diagonal)
+    if len(diagonal_set) == 1 and EMPTY not in diagonal_set:
+        return diagonal_set.pop()
+    else:
+        return None
+    
 def winner(board):
-    """
-    Returns the winner of the game, if there is one.
-    """
-    raise NotImplementedError
+    res1 = get_winner_from_half_matrix(board)
+    if res1:
+        return res1
+    else:
+        new_board = pd.DataFrame(board).T.values.tolist()
+        return get_winner_from_half_matrix(new_board)
 
 
 def terminal(board):

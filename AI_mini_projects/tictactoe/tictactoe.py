@@ -2,7 +2,9 @@
 Tic Tac Toe Player
 """
 
+import copy
 import math
+import pandas as pd
 
 X = "X"
 O = "O"
@@ -28,31 +30,50 @@ def player(board):
 
 
 def actions(board):
-    """
-    Returns set of all possible actions (i, j) available on the board.
-    """
-    raise NotImplementedError
+    possible_actions = set()
+    for y, row in enumerate(board):
+        for x, state in enumerate(row):
+            if (state == EMPTY):
+                possible_actions.add(x, y)
+    return possible_actions
 
 
 def result(board, action):
-    """
-    Returns the board that results from making move (i, j) on the board.
-    """
-    raise NotImplementedError
+    if board[action[1], action[0]] != EMPTY:
+        raise Exception("WrongPositionError")
+    board_copy = copy.deepcopy(board)
+    board_copy[action[1]][action[0]] = player(board)
+    return board_copy
 
-
+def get_winner_from_half_matrix(board):
+    diagonal = []
+    for i, row in enumerate(board):
+        values = set(row)
+        if len(values) == 1 and EMPTY not in values:
+            return values.pop()
+        diagonal.append(board[i][i])
+    diagonal_set = set(diagonal)
+    if len(diagonal_set) == 1 and EMPTY not in diagonal_set:
+        return diagonal_set.pop()
+    else:
+        return None
+    
 def winner(board):
-    """
-    Returns the winner of the game, if there is one.
-    """
-    raise NotImplementedError
+    res1 = get_winner_from_half_matrix(board)
+    if res1:
+        return res1
+    else:
+        new_board = pd.DataFrame(board).T.values.tolist()
+        return get_winner_from_half_matrix(new_board)
 
 
 def terminal(board):
-    """
-    Returns True if game is over, False otherwise.
-    """
-    raise NotImplementedError
+    if winner(board):
+        return True
+    for row in board:
+        if EMPTY in row:
+            return False
+    return True
 
 
 def utility(board):

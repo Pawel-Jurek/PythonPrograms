@@ -34,15 +34,15 @@ def actions(board):
     for y, row in enumerate(board):
         for x, state in enumerate(row):
             if (state == EMPTY):
-                possible_actions.add((x, y))
+                possible_actions.add((y, x))
     return possible_actions
 
 
 def result(board, action):
-    if board[action[1], action[0]] != EMPTY:
+    if board[action[0]][action[1]] != EMPTY:
         raise Exception("WrongPositionError")
     board_copy = copy.deepcopy(board)
-    board_copy[action[1]][action[0]] = player(board)
+    board_copy[action[0]][action[1]] = player(board)
     return board_copy
 
 def get_winner_from_half_matrix(board):

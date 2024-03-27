@@ -45,26 +45,33 @@ def result(board, action):
     board_copy[action[0]][action[1]] = player(board)
     return board_copy
 
-def get_winner_from_half_matrix(board):
-    diagonal = []
+def get_winner_from_matrix_rows(board):
+    diagonal1 = []
+    diagonal2 = []
     for i, row in enumerate(board):
         values = set(row)
         if len(values) == 1 and EMPTY not in values:
             return values.pop()
-        diagonal.append(board[i][i])
-    diagonal_set = set(diagonal)
-    if len(diagonal_set) == 1 and EMPTY not in diagonal_set:
-        return diagonal_set.pop()
+        diagonal1.append(board[i][i])
+        diagonal2.append(board[2-i][i])
+        
+    diagonal1_set = set(diagonal1)
+    diagonal2_set = set(diagonal2)
+
+    if len(diagonal1_set) == 1 and EMPTY not in diagonal1_set:
+        return diagonal1_set.pop()
+    elif len(diagonal2_set) == 1 and EMPTY not in diagonal2_set:
+        return diagonal2_set.pop()
     else:
         return None
     
 def winner(board):
-    res1 = get_winner_from_half_matrix(board)
+    res1 = get_winner_from_matrix_rows(board)
     if res1:
         return res1
     else:
         new_board = pd.DataFrame(board).T.values.tolist()
-        return get_winner_from_half_matrix(new_board)
+        return get_winner_from_matrix_rows(new_board)
 
 
 def terminal(board):

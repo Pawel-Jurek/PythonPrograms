@@ -40,6 +40,10 @@ board9 = [[EMPTY, EMPTY, O],
           [EMPTY, O, EMPTY],
           [O, EMPTY, EMPTY]]
 
+board10 = [[X, O, X],
+           [X, O, O],
+           [O, X, X]]
+
 class PlayerFunctionTest(unittest.TestCase):
     def test_moreX(self):
         result = player(board1)
@@ -132,6 +136,24 @@ class WinnerFunctionTest(unittest.TestCase):
     def test_winningO3(self):
         result = winner(board9)
         self.assertEqual(result, O)
+
+
+class TerminalFunctionTest(unittest.TestCase):
+    def test_end_with_winner(self):
+        result = terminal(board1)
+        self.assertEqual(result, True)
+    
+    def test_end_with_winner2(self):
+        result = terminal(board9)
+        self.assertEqual(result, True)
+
+    def test_end_with_full(self):
+        result = terminal(board10)
+        self.assertEqual(result, True)
+
+    def test_end_with_moves1(self):
+        result = terminal(board2)
+        self.assertEqual(result, False)
 
 
 if __name__ == '__main__':

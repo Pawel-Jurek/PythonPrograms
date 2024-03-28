@@ -46,22 +46,19 @@ def result(board, action):
     return board_copy
 
 def get_winner_from_matrix_rows(board):
-    diagonal1 = []
-    diagonal2 = []
+    diagonal1 = set()
+    diagonal2 = set()
     for i, row in enumerate(board):
         values = set(row)
         if len(values) == 1 and EMPTY not in values:
             return values.pop()
-        diagonal1.append(board[i][i])
-        diagonal2.append(board[2-i][i])
-        
-    diagonal1_set = set(diagonal1)
-    diagonal2_set = set(diagonal2)
+        diagonal1.add(board[i][i])
+        diagonal2.add(board[2-i][i])
 
-    if len(diagonal1_set) == 1 and EMPTY not in diagonal1_set:
-        return diagonal1_set.pop()
-    elif len(diagonal2_set) == 1 and EMPTY not in diagonal2_set:
-        return diagonal2_set.pop()
+    if len(diagonal1) == 1 and EMPTY not in diagonal1:
+        return diagonal1.pop()
+    elif len(diagonal2) == 1 and EMPTY not in diagonal2:
+        return diagonal2.pop()
     else:
         return None
     
@@ -89,7 +86,56 @@ def utility(board):
     
 
 def minimax(board):
-    """
-    Returns the optimal action for the current player on the board.
-    """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+    
+    if player(board) == X:
+        best_val = float('-inf')
+        best_move = None
+        alpha = float('-inf')
+        for action in actions(board):
+            value = min_value(result(board, action), alpha, float('inf'))
+            if value > best_val:
+                if value == 1:
+                    return action
+                best_val = value
+                best_move = action
+            alpha = max(alpha, value)
+        return best_move
+    else:
+        best_val = float('inf')
+        best_move = None
+        beta = float('inf')
+        for action in actions(board):
+            value = max_value(result(board, action), float('-inf'), beta)
+            if value < best_val:
+                if value == -1:
+                    return action
+                best_val = value
+                best_move = action
+            beta = min(beta, value)
+        return best_move
+
+def max_value(board, alpha, beta):
+    if terminal(board):
+        return utility(board)
+    value = float('-inf')
+    for action in actions(board):
+        value = max(value, min_value(result(board, action), alpha, beta))
+        if value >= beta:
+            return value
+        alpha = max(alpha, value)
+    return value
+
+def min_value(board, alpha, beta):
+    if terminal(board):
+        return utility(board)
+    value = float('inf')
+    for action in actions(board):
+        value = min(value, max_value(result(board, action), alpha, beta))
+        if value <= alpha:
+            return value
+        beta = min(beta, value)
+    return value
+
+

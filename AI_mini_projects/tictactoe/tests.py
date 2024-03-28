@@ -44,6 +44,14 @@ board10 = [[X, O, X],
            [X, O, O],
            [O, X, X]]
 
+board11 = [[O, EMPTY, EMPTY],
+           [X, O, O],
+           [EMPTY, X, X]]
+
+board12 = [[EMPTY, O, EMPTY],
+           [X, X, O],
+           [O, X, EMPTY]]
+
 class PlayerFunctionTest(unittest.TestCase):
     def test_moreX(self):
         result = player(board1)
@@ -155,6 +163,14 @@ class TerminalFunctionTest(unittest.TestCase):
         result = terminal(board2)
         self.assertEqual(result, False)
 
+class MinimaxFunctionTest(unittest.TestCase):
+    def test_X_winning(self):
+        result = minimax(board11)
+        self.assertEqual(result, (2,0))
+
+    def test_O_winning(self):
+        result = minimax(board12)
+        self.assertEqual(result, (0,2))
 
 if __name__ == '__main__':
     unittest.main()

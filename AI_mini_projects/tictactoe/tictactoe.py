@@ -46,22 +46,19 @@ def result(board, action):
     return board_copy
 
 def get_winner_from_matrix_rows(board):
-    diagonal1 = []
-    diagonal2 = []
+    diagonal1 = set()
+    diagonal2 = set()
     for i, row in enumerate(board):
         values = set(row)
         if len(values) == 1 and EMPTY not in values:
             return values.pop()
-        diagonal1.append(board[i][i])
-        diagonal2.append(board[2-i][i])
-        
-    diagonal1_set = set(diagonal1)
-    diagonal2_set = set(diagonal2)
+        diagonal1.add(board[i][i])
+        diagonal2.add(board[2-i][i])
 
-    if len(diagonal1_set) == 1 and EMPTY not in diagonal1_set:
-        return diagonal1_set.pop()
-    elif len(diagonal2_set) == 1 and EMPTY not in diagonal2_set:
-        return diagonal2_set.pop()
+    if len(diagonal1) == 1 and EMPTY not in diagonal1:
+        return diagonal1.pop()
+    elif len(diagonal2) == 1 and EMPTY not in diagonal2:
+        return diagonal2.pop()
     else:
         return None
     
@@ -89,7 +86,36 @@ def utility(board):
     
 
 def minimax(board):
-    """
-    Returns the optimal action for the current player on the board.
-    """
-    raise NotImplementedError
+    if terminal(board):
+        return None
+    
+    if player(board) == X:
+        best_val = float('-inf')
+        best_move = None
+        for action in actions(board):
+            value = min_value(result(board, action))
+            if value > best_val:
+                best_val = value
+                best_move = action
+        return best_move
+    else:
+        best_val = float('inf')
+        best_move = None
+        for action in actions(board):
+            value = max_value(result(board, action))
+            if value < best_val:
+                best_val = value
+                best_move = action
+        return best_move
+    
+def max_value(board):
+    if terminal(board):
+        return utility(board)
+    return max([min_value(result(board, action)) for action in actions(board)])
+
+def min_value(board):
+    if terminal(board):
+        return utility(board)
+    return min([max_value(result(board, action)) for action in actions(board)])
+
+

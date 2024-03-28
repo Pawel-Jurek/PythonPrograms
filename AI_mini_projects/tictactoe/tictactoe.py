@@ -92,30 +92,50 @@ def minimax(board):
     if player(board) == X:
         best_val = float('-inf')
         best_move = None
+        alpha = float('-inf')
         for action in actions(board):
-            value = min_value(result(board, action))
+            value = min_value(result(board, action), alpha, float('inf'))
             if value > best_val:
+                if value == 1:
+                    return action
                 best_val = value
                 best_move = action
+            alpha = max(alpha, value)
         return best_move
     else:
         best_val = float('inf')
         best_move = None
+        beta = float('inf')
         for action in actions(board):
-            value = max_value(result(board, action))
+            value = max_value(result(board, action), float('-inf'), beta)
             if value < best_val:
+                if value == -1:
+                    return action
                 best_val = value
                 best_move = action
+            beta = min(beta, value)
         return best_move
-    
-def max_value(board):
-    if terminal(board):
-        return utility(board)
-    return max([min_value(result(board, action)) for action in actions(board)])
 
-def min_value(board):
+def max_value(board, alpha, beta):
     if terminal(board):
         return utility(board)
-    return min([max_value(result(board, action)) for action in actions(board)])
+    value = float('-inf')
+    for action in actions(board):
+        value = max(value, min_value(result(board, action), alpha, beta))
+        if value >= beta:
+            return value
+        alpha = max(alpha, value)
+    return value
+
+def min_value(board, alpha, beta):
+    if terminal(board):
+        return utility(board)
+    value = float('inf')
+    for action in actions(board):
+        value = min(value, max_value(result(board, action), alpha, beta))
+        if value <= alpha:
+            return value
+        beta = min(beta, value)
+    return value
 
 

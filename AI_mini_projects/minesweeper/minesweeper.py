@@ -107,7 +107,8 @@ class Sentence():
         """
         if len(self.cells) == self.count:
             return self.cells
-        raise NotImplementedError
+        else:
+            return None
 
     def known_safes(self):
         """

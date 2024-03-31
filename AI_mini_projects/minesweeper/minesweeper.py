@@ -113,7 +113,10 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        raise NotImplementedError
+        if len(self.cells) == 0:
+            return self.cells
+        else:
+            return None
 
     def mark_mine(self, cell):
         """

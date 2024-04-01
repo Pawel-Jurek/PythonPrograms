@@ -102,6 +102,9 @@ class Sentence():
 
     def __str__(self):
         return f"{self.cells} = {self.count}"
+    
+    def __hash__(self):
+        return hash(frozenset(self.cells)) + hash(self.count)
 
     def known_mines(self):
         """
@@ -116,7 +119,7 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        if len(self.cells) == 0:
+        if self.count == 0:
             return self.cells.union(self.safe)
         else:
             return self.safe
@@ -195,7 +198,46 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        self.moves_made.add(cell)
+        self.safes.add(cell)
+        cells = set()
+        for i in range(-1,2,1):
+            for j in range(-1,2,1):
+                if cell[0] + i >= 0 and cell[0] + i < self.width and cell[1] + j >= 0 and cell[1] + j < self.height and (cell[0] + i, cell[1] + j) not in self.safes and (i, j) not in self.mines:
+                    cells.add((cell[0]+i, cell[1] +j))
+        self.knowledge.append(Sentence(cells, count))
+        new_mines = set()
+        new_safes = set()
+        for sentence in self.knowledge:
+            new_mines.update(sentence.known_mines())
+            new_safes.update(sentence.known_safes())
+
+        for sentence1 in self.knowledge:
+            for sentence2 in self.knowledge:
+                if sentence1 != sentence2:
+                    if sentence1.cells.issubset(sentence2.cells):
+                        sentence2.cells = sentence2.cells.difference(sentence1.cells)
+                        sentence2.count -= sentence1.count
+                    elif sentence2.cells.issubset(sentence1.cells):
+                        sentence1.cells = sentence1.cells.difference(sentence2.cells)
+                        sentence1.count -= sentence2.count
+
+        new_mines = new_mines.difference(self.mines)
+        new_safes = new_safes.difference(self.safes)
+
+        for new_mine in new_mines:
+            self.mark_mine(new_mine)
+
+        for new_safe in new_safes:
+            self.mark_safe(new_safe)
+
+        self.mines.update(new_mines)
+        self.safes.update(new_safes)
+
+        unique_sentences = set(self.knowledge)
+        self.knowledge = list(unique_sentences)
+
+        self.knowledge = [sentence for sentence in self.knowledge if sentence.cells]
 
     def make_safe_move(self):
         """
@@ -206,7 +248,13 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
+        safe_moves = self.safes.difference(self.moves_made)
+        move = None
+        if safe_moves:
+            move = safe_moves.pop()
+            self.moves_made.add(move)
+        return move
+
 
     def make_random_move(self):
         """

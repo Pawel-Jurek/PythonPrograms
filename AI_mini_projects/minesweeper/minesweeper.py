@@ -94,6 +94,8 @@ class Sentence():
     def __init__(self, cells, count):
         self.cells = set(cells)
         self.count = count
+        self.mines = set()
+        self.safe = set()
 
     def __eq__(self, other):
         return self.cells == other.cells and self.count == other.count
@@ -106,32 +108,37 @@ class Sentence():
         Returns the set of all cells in self.cells known to be mines.
         """
         if len(self.cells) == self.count:
-            return self.cells
+            return self.cells.union(self.mines)
         else:
-            return None
+            return self.mines
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
         if len(self.cells) == 0:
-            return self.cells
+            return self.cells.union(self.safe)
         else:
-            return None
+            return self.safe
 
     def mark_mine(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.mines.add(cell)
+            self.cells.remove(cell)
+            self.count -= 1
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.safe.add(cell)
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():

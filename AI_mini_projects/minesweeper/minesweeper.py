@@ -203,7 +203,7 @@ class MinesweeperAI():
         cells = set()
         for i in range(-1,2,1):
             for j in range(-1,2,1):
-                if cell[0] + i >= 0 and cell[0] + i < self.width and cell[1] + j >= 0 and cell[1] + j < self.height and (cell[0] + i, cell[1] + j) not in self.safes and (i, j) not in self.mines:
+                if cell[0] + i >= 0 and cell[0] + i < self.width and cell[1] + j >= 0 and cell[1] + j < self.height and (cell[0] + i, cell[1] + j) not in self.safes and (cell[0] + i, cell[1] + j) not in self.mines:
                     cells.add((cell[0]+i, cell[1] +j))
         self.knowledge.append(Sentence(cells, count))
         new_mines = set()
@@ -239,6 +239,7 @@ class MinesweeperAI():
 
         self.knowledge = [sentence for sentence in self.knowledge if sentence.cells]
 
+
     def make_safe_move(self):
         """
         Returns a safe cell to choose on the Minesweeper board.
@@ -263,4 +264,12 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        print(self.mines)
+        for i in range(8):
+            for j in range(8):
+                if (i,j) not in self.mines and (i,j) not in self.moves_made:
+                    self.moves_made.add((i,j))
+                    print((i,j))
+                    return (i,j)
+        return None
+

@@ -201,43 +201,49 @@ class MinesweeperAI():
         self.moves_made.add(cell)
         self.safes.add(cell)
         cells = set()
+        completed = False
         for i in range(-1,2,1):
             for j in range(-1,2,1):
-                if cell[0] + i >= 0 and cell[0] + i < self.width and cell[1] + j >= 0 and cell[1] + j < self.height and (cell[0] + i, cell[1] + j) not in self.safes and (i, j) not in self.mines:
-                    cells.add((cell[0]+i, cell[1] +j))
+                if cell[0] + i >= 0 and cell[0] + i < self.height and cell[1] + j >= 0 and cell[1] + j < self.width and (cell[0] + i, cell[1] + j) not in self.safes: #and (cell[0] + i, cell[1] + j) not in self.mines:
+                    cells.add((cell[0]+i, cell[1]+j))
         self.knowledge.append(Sentence(cells, count))
-        new_mines = set()
-        new_safes = set()
-        for sentence in self.knowledge:
-            new_mines.update(sentence.known_mines())
-            new_safes.update(sentence.known_safes())
 
-        for sentence1 in self.knowledge:
-            for sentence2 in self.knowledge:
-                if sentence1 != sentence2:
-                    if sentence1.cells.issubset(sentence2.cells):
-                        sentence2.cells = sentence2.cells.difference(sentence1.cells)
-                        sentence2.count -= sentence1.count
-                    elif sentence2.cells.issubset(sentence1.cells):
-                        sentence1.cells = sentence1.cells.difference(sentence2.cells)
-                        sentence1.count -= sentence2.count
+        while(not completed):
+            completed = True
+            for sentence1 in self.knowledge:
+                for sentence2 in self.knowledge:
+                    if sentence1 != sentence2:
+                        if sentence1.cells.issubset(sentence2.cells):
+                            sentence2.cells = sentence2.cells.difference(sentence1.cells)
+                            sentence2.count -= sentence1.count
+                        elif sentence2.cells.issubset(sentence1.cells):
+                            sentence1.cells = sentence1.cells.difference(sentence2.cells)
+                            sentence1.count -= sentence2.count
+        
+        
+            for sentence in self.knowledge:
+                if cell in sentence.cells:
+                    sentence.cells = sentence.cells.remove(cell)
+                if sentence.cells:
+                    self.mines.update(sentence.known_mines())
+                    self.safes.update(sentence.known_safes())
 
-        new_mines = new_mines.difference(self.mines)
-        new_safes = new_safes.difference(self.safes)
+            self.knowledge = [sentence for sentence in self.knowledge if sentence.cells]
 
-        for new_mine in new_mines:
-            self.mark_mine(new_mine)
+            for mine in self.mines:
+                self.mark_mine(mine)
 
-        for new_safe in new_safes:
-            self.mark_safe(new_safe)
+            for safe in self.safes:
+                self.mark_safe(safe)
 
-        self.mines.update(new_mines)
-        self.safes.update(new_safes)
+            self.knowledge = [sentence for sentence in self.knowledge if sentence.cells]
+            for sentence in self.knowledge:
+                if sentence.count == 0 or sentence.count == 1 and len(sentence.cells) == 1:
+                    completed = False
+            
+            unique_sentences = set(self.knowledge)
+            self.knowledge = list(unique_sentences)
 
-        unique_sentences = set(self.knowledge)
-        self.knowledge = list(unique_sentences)
-
-        self.knowledge = [sentence for sentence in self.knowledge if sentence.cells]
 
     def make_safe_move(self):
         """
@@ -263,4 +269,12 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        print(self.mines)
+        for i in range(8):
+            for j in range(8):
+                if (i,j) not in self.mines and (i,j) not in self.moves_made:
+                    self.moves_made.add((i,j))
+                    print((i,j))
+                    return (i,j)
+        return None
+

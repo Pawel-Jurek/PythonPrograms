@@ -111,6 +111,20 @@ def sample_pagerank(corpus, damping_factor, n):
     return visited_pages
 
 
+def numLinks(page, corpus):
+    return len(corpus[page])
+
+
+def calculate_PR(PRs, page, damping_factor, corpus):
+    new_value = (1 - damping_factor) / len(PRs.keys())
+    for key in corpus.keys():
+        if page in corpus[key]:
+            new_value += damping_factor * PRs[key] / numLinks(key, corpus)
+        elif corpus[key] == {}:
+            new_value += damping_factor * 1 / len(PRs.keys())
+    return new_value
+
+
 def iterate_pagerank(corpus, damping_factor):
     """
     Return PageRank values for each page by iteratively updating
@@ -120,7 +134,21 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+
+    PRs = {}
+    for key in corpus.keys():
+        PRs[key] = 1 / len(corpus.keys())
+
+    new_PRs = PRs.copy()
+    convergence = False
+    while not convergence:
+        for page in corpus.keys():
+            new_PRs[page] = calculate_PR(PRs, page, damping_factor, corpus)
+
+        convergence = all(abs(new_PRs[page] - PRs[page]) <= 0.001 for page in PRs.keys())
+        PRs = new_PRs.copy()
+
+    return PRs
 
 
 if __name__ == "__main__":

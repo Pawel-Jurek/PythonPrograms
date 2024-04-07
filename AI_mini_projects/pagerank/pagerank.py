@@ -80,7 +80,49 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    visited_pages = {}
+    for key in corpus.keys():
+        visited_pages[key] = 0
+    current_page = list(corpus.keys())[random.randint(0, len(corpus.keys())-1)]
+    visited_pages[current_page] +=1
+
+    for i in range(1,n,1):
+        probability = transition_model(corpus, current_page, damping_factor)
+        pages = []
+        cdf_values = []
+
+        for key, value in probability.items():
+            if len(pages) == 0:
+                pages.append(key)
+                cdf_values.append(value)
+            else:
+                pages.append(key)
+                cdf_values.append(value + cdf_values[-1])
+        random_value = random.random()
+        for j, cdf_value in enumerate(cdf_values):
+            if cdf_value >= random_value:
+                current_page = pages[j]
+                break
+        visited_pages[current_page] +=1
+
+    for key in corpus.keys():
+        visited_pages[key] /= n
+
+    return visited_pages
+
+
+def numLinks(page, corpus):
+    return len(corpus[page])
+
+
+def calculate_PR(PRs, page, damping_factor, corpus):
+    new_value = (1 - damping_factor) / len(PRs.keys())
+    for key in corpus.keys():
+        if page in corpus[key]:
+            new_value += damping_factor * PRs[key] / numLinks(key, corpus)
+        elif corpus[key] == {}:
+            new_value += damping_factor * 1 / len(PRs.keys())
+    return new_value
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -92,7 +134,21 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+
+    PRs = {}
+    for key in corpus.keys():
+        PRs[key] = 1 / len(corpus.keys())
+
+    new_PRs = PRs.copy()
+    convergence = False
+    while not convergence:
+        for page in corpus.keys():
+            new_PRs[page] = calculate_PR(PRs, page, damping_factor, corpus)
+
+        convergence = all(abs(new_PRs[page] - PRs[page]) <= 0.001 for page in PRs.keys())
+        PRs = new_PRs.copy()
+
+    return PRs
 
 
 if __name__ == "__main__":

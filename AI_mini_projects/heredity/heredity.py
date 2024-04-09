@@ -72,7 +72,8 @@ def main():
         )
         if fails_evidence:
             continue
-
+        #testing line
+        joint_probability(people, {"Harry"}, {"James"}, {"James"})
         # Loop over all sets of people who might have the gene
         for one_gene in powerset(names):
             for two_genes in powerset(names - one_gene):
@@ -127,6 +128,12 @@ def powerset(s):
         )
     ]
 
+def parent_giving_gene_prob(gens):
+    if gens == 0:
+        temp_prob = PROBS["mutation"]
+    else:
+        temp_prob = (1 - PROBS["mutation"]) * (gens/2)
+    return temp_prob
 
 def joint_probability(people, one_gene, two_genes, have_trait):
     """
@@ -139,10 +146,54 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    parents_data = {}
+    parents = {}
+    children = {}
+    for key, value in people.items():
+        if not people[key]["mother"]:
+            parents[key] = value
+        else:
+            children[key] = value
+
+    probability = 1
+    for parent in parents:
+        if parent in one_gene:
+            probability *= PROBS["gene"][1]
+            gens = 1
+        elif parent in two_genes:
+            probability *= PROBS["gene"][2]
+            gens = 2
+        else:
+            probability *= PROBS["gene"][0]
+            gens = 0
+        parents_data[parent] = {"gene": gens, "have_trait": parent in have_trait}
+        probability *= PROBS["trait"][gens][parent in have_trait]
+        
+    for child in children:
+        mother = people[child]["mother"]
+        father = people[child]["father"]
+        mother_gens = parents_data[mother]["gene"]
+        father_gens = parents_data[father]["gene"]
+        prob_gen_from_mother = parent_giving_gene_prob(mother_gens)
+        prob_gen_from_father = parent_giving_gene_prob(father_gens)
+
+        if child in one_gene:
+            probability *= prob_gen_from_mother * (1- prob_gen_from_father) + (1- prob_gen_from_mother) * prob_gen_from_father
+            gens = 1
+        elif child in two_genes:
+            probability *= prob_gen_from_mother * prob_gen_from_father
+            gens = 2
+        else:
+            probability *= (1- prob_gen_from_father) * (1- prob_gen_from_mother)
+            gens = 0
+        
+        probability *= PROBS["trait"][gens][child in have_trait] 
+
+    return probability
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
+
     """
     Add to `probabilities` a new joint probability `p`.
     Each person should have their "gene" and "trait" distributions updated.

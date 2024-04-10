@@ -72,8 +72,7 @@ def main():
         )
         if fails_evidence:
             continue
-        #testing line
-        joint_probability(people, {"Harry"}, {"James"}, {"James"})
+
         # Loop over all sets of people who might have the gene
         for one_gene in powerset(names):
             for two_genes in powerset(names - one_gene):
@@ -186,21 +185,27 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         else:
             probability *= (1- prob_gen_from_father) * (1- prob_gen_from_mother)
             gens = 0
-        
+        parents_data[child] = {"gene": gens, "have_trait": child in have_trait}
         probability *= PROBS["trait"][gens][child in have_trait] 
 
     return probability
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
-
     """
     Add to `probabilities` a new joint probability `p`.
     Each person should have their "gene" and "trait" distributions updated.
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    for person in probabilities:
+        if person in one_gene:
+            probabilities[person]["gene"][1] += p
+        elif person in two_genes:
+            probabilities[person]["gene"][2] += p
+        else:
+            probabilities[person]["gene"][0] += p
+        probabilities[person]["trait"][person in have_trait] += p
 
 
 def normalize(probabilities):
@@ -208,7 +213,14 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    for person in probabilities:
+        gene_prob = sum([probabilities[person]["gene"][i] for i in range(3)])
+        for i in range(3):
+            probabilities[person]["gene"][i] /= gene_prob
+
+        trait_prob = sum([probabilities[person]["trait"][i == 0] for i in range(2)])
+        for i in range(2):
+            probabilities[person]["trait"][i==0] /= trait_prob
 
 
 if __name__ == "__main__":

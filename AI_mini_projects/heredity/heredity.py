@@ -193,14 +193,20 @@ def joint_probability(people, one_gene, two_genes, have_trait):
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
-
     """
     Add to `probabilities` a new joint probability `p`.
     Each person should have their "gene" and "trait" distributions updated.
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    for person in probabilities:
+        if person in one_gene:
+            probabilities[person]["gene"][1] += p
+        elif person in two_genes:
+            probabilities[person]["gene"][2] += p
+        else:
+            probabilities[person]["gene"][0] += p
+        probabilities[person]["trait"][person in have_trait] += p
 
 
 def normalize(probabilities):

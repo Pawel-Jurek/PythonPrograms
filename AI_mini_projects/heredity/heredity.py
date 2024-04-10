@@ -185,7 +185,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         else:
             probability *= (1- prob_gen_from_father) * (1- prob_gen_from_mother)
             gens = 0
-        
+        parents_data[child] = {"gene": gens, "have_trait": child in have_trait}
         probability *= PROBS["trait"][gens][child in have_trait] 
 
     return probability
